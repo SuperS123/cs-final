@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SAT Practice - shivpurohit.com</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        let startTime = new Date().getTime();
+        let timerInterval;
+
+        function startTimer() {
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function submitAnswer(choice) {
+            stopTimer();
+            document.getElementById('choiceInput').value = choice;
+            disableChoices();
+            document.getElementById('quizForm').submit();
+        }
+
+        function disableChoices() {
+            let choices = document.getElementsByClassName('choice-box');
+            for (let i = 0; i < choices.length; i++) {
+                choices[i].onclick = null;
+                choices[i].style.cursor = 'default';
+            }
+        }
+
+        function updateTimer() {
+            let currentTime = new Date().getTime();
+            let elapsedTime = currentTime - startTime;
+            document.getElementById('timer').innerText = "Time: " + Math.floor(elapsedTime / 1000) + " seconds";
+        }
+
+        function toggleExplanation() {
+            let explanationBox = document.getElementById('explanationBox');
+            if (explanationBox.style.display === "none") {
+                explanationBox.style.display = "block";
+            } else {
+                explanationBox.style.display = "none";
+            }
+        }
+
+        window.onload = startTimer;
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <a class="end-btn" href="{{ url_for('end') }}">End Quiz</a>
+            <span id="timer">Time: 0 seconds</span>
+        </header>
+        <h1>{{ question.topic }}: {{ question.skill }}</h1>
+        <div class="difficulty-level">
+            {% for i in range(1, 4) %}
+                <div class="difficulty-box {{ 'filled' if i <= session['difficulty'] else '' }}"></div>
+            {% endfor %}
+        </div>
+        <div class="two-pane">
+            <div class="left-pane">
+                {% if question.image and question.image != False %}
+                    <img src="{{ url_for('static', filename=question.image) }}" alt="Question Image">
+                {% endif %}
+                {% if question.table and question.table != False %}
+                    <img src="{{ url_for('static', filename=question.table) }}" alt="Question Image">
+                {% endif %}
+                <p>{{ question.prompt | format_text | safe }}</p>
+            </div>
+            <div class="right-pane">
+                <form id="quizForm" method="POST">
+                    <input type="hidden" id="choiceInput" name="choice" value="">
+                    <input type="hidden" name="question_id" value="{{ question.id }}">
+                    <input type="hidden" name="correct_answer" value="{{ question.correct_answer }}">
+                    <input type="hidden" name="explanation" value="{{ question.explanation }}">
+                    <p><strong>{{ question.question }}</strong></p><br>
+		    {% for choice in question.choices %}
+                        <div class="choice-box {{ 'correct' if selected_choice is defined and loop.index0 == correct_answer else 'incorrect' if selected_choice is defined and loop.index0 == selected_choice else '' }}" onclick="submitAnswer({{ loop.index0 }})">
+                            {{ choice }}
+                        </div>
+                    {% endfor %}
+                </form>
+            </div>
+        </div>
+        {% if selected_choice is defined %}
+            <div class="explanation-toggle">
+                <button onclick="toggleExplanation()">Toggle Explanation</button>
+                <a href="{{ url_for('quiz') }}" class="next-btn">Next Question</a>
+            </div>
+            <div id="explanationBox" class="explanation" style="display: block;">
+                <p>{{ explanation }}</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

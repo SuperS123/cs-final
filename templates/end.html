@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz End</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            border: 1px solid #ddd;
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr.correct {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        tr.incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        tr:not(:last-child) {
+            border-bottom: 10px solid #e0e0e0;
+        }
+
+        .score-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .score-container h2 {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        .score-container p {
+            margin-bottom: 10px;
+        }
+
+        .score-container .score {
+            font-size: 3em;
+            font-weight: bold;
+        }
+
+        .restart-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .restart-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="score-container">
+            <h2>Your Practice Session</h2>
+            <p>{{ date.strftime('%B %d, %Y') }}</p>
+            <div class="score">{{ score }}</div>
+            <a href="{{ url_for('quiz') }}" class="restart-btn">Restart Quiz</a>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Topic</th>
+                    <th>Skill</th>
+                    <th>Prompt</th>
+                    <th>Image</th>
+                    <th>Your Answer</th>
+                    <th>Correct Answer</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for question in questions %}
+                    <tr class="{{ 'correct' if selected_choices[question.id] == question.correct_answer else 'incorrect' }}">
+                        <td>{{ question.topic }}</td>
+                        <td>{{ question.skill }}</td>
+                        <td>{{ question.prompt }}</td>
+                        <td>
+                            {% if question.image %}
+                                <a href="{{ url_for('static', filename=question.image) }}" target="_blank">View Image</a>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>{{ ['A', 'B', 'C', 'D'][selected_choices[question.id]] }}</td>
+                        <td>{{ ['A', 'B', 'C', 'D'][question.correct_answer] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
